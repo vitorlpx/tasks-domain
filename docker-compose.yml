@@ -1,0 +1,23 @@
+services:
+  localstack:
+    image: localstack/localstack:3.4
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,dynamodb,lambda
+      - DEFAULT_REGION=us-east-1
+      - DEBUG=0
+      - PERSISTENCE=0
+      # - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - ${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  localstack_data:
