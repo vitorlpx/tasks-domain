@@ -4,8 +4,9 @@ from src.repositories.task_repository import TaskRepository
 from src.services.task_service import TaskService
 from src.schemas.task import TaskCreate, TaskResponse, TaskStatusUpdate, TaskDelete
 from src.db.database import get_db
+from src.core.auth import get_current_user_id
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(get_current_user_id)])
 
 repository = TaskRepository()
 service = TaskService(repository)  
