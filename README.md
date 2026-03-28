@@ -27,7 +27,8 @@ tasks-domain/
 │       │   └── routes/
 │       │       └── task.py
 │       ├── core/
-│       │   └── config.py
+│       │   ├── config.py
+│       │   └── exceptions.py
 │       ├── db/
 │       │   └── database.py
 │       ├── models/
@@ -180,7 +181,7 @@ terraform apply -var-file=inventories/local/terraform.tfvars
 
 ### 1. Por que a camada de `service` foi usada
 
-Decidi optar por utilizar o service para isolar a camada onde fica as lógicas do projeto, atribuindo a o principio do SOLID de responsabilidade única. No geral, estruturar o projeto MVC justamente para cada parte ter sua responsabilidade. Isso permite que a camada de repositório seja substituída (por exemplo, trocar SQLite por PostgreSQL) sem tocar nas regras de negócio, e que os endpoints não precisem conhecer como os dados são persistidos.
+Decidi utilizar o service para isolar as regras de negócio do projeto, aplicando o princípio de responsabilidade única do SOLID. Isso permite que a camada de repositório seja substituída — por exemplo, trocar SQLite por PostgreSQL — sem tocar nas regras de negócio, e que os endpoints não precisem conhecer como os dados são persistidos.
 
 ### 2. Padrões de design aplicados
 
@@ -201,3 +202,24 @@ Utilizei o **Repository Pattern** para abstrair o acesso ao banco e uma **Servic
 - **Sem autenticação:** a API não possui autenticação. Com mais tempo, adicionaria JWT ou API Key para proteger os endpoints.
 
 - **CI/CD com GitHub Actions:** com mais tempo, adicionaria uma pipeline de CI/CD para execução automática dos testes e deploy da aplicação a cada Pull Request.
+
+---
+
+## Extras implementados
+
+### Exceptions personalizadas
+
+Além do escopo base do desafio, foi implementada uma camada de exceções personalizadas em `src/core/exceptions.py`, com hierarquia bem definida:
+
+- `TaskException` — classe base
+- `FailedToGetTaskException` — task não encontrada pelo ID
+- `FailedToCreateTaskException` — falha na criação
+- `FailedToUpdateTaskException` — falha na atualização de status
+- `FailedToDeleteTaskException` — falha na exclusão
+- `InvalidTaskStatusException` — status inválido fornecido
+
+Os handlers são registrados centralmente no `main.py` via `@app.exception_handler`, mantendo as rotas completamente limpas de blocos `try/except` e centralizando o tratamento de erros em um único lugar.
+
+### Método Delete e Patch
+
+Também foi adicionado duas rotas a mais: `PATCH` e `DELETE`. Permitindo a atualização parcial e a exclusão de uma task.
