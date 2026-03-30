@@ -6,11 +6,11 @@ from src.schemas.user import UserRegister
 from src.repositories.user_repository import UserRepository
 
 class AuthService:
-    def __init__(self, user_repo: UserRepository):
-        self.user_repo = user_repo
+    def __init__(self, repository: UserRepository):
+        self.repository = repository
 
     def authenticate_user(self, db: Session, email: str, password: str) -> dict:
-        user = self.user_repo.get_by_email(db, email)
+        user = self.repository.get_by_email(db, email)
         if not user:
             raise UserNotFoundException(email)
           
@@ -21,12 +21,12 @@ class AuthService:
         return {"access_token": token, "token_type": "bearer"}
 
     def register_user(self, db: Session, user_data: UserRegister) -> dict:
-        existing_user = self.user_repo.get_by_email(db, user_data.email)
+        existing_user = self.repository.get_by_email(db, user_data.email)
         if existing_user:
             raise UserAlreadyExistsException(user_data.email)
 
         hashed = get_password_hash(user_data.password)
-        created_user = self.user_repo.create(db, user_data, hashed)
+        created_user = self.repository.create(db, user_data, hashed)
         return {
             "message": "Usuário criado com sucesso",
             "created_at": created_user.created_at,
