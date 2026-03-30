@@ -85,7 +85,7 @@ def test_get_task_not_found():
     
     # Assert
     assert response.status_code == 404
-    assert response.json() == {"detail": "Tarefa não encontrada."}
+    assert response.json() == {"detail": "Task with id 9999 not found."}
     
 def test_delete_task():
     # Arrange 
