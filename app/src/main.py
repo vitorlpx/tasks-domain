@@ -25,7 +25,7 @@ from src.models import user # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Task API", version="1.0.0")
+app = FastAPI(title="Task API", version="1.0.0", docs_url="/docs", redoc_url="/redoc")
 
 app.include_router(task_router, prefix="/tasks", tags=["tasks"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
