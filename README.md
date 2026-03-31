@@ -296,3 +296,7 @@ Também foi adicionada autenticação com JWT usando `PyJWT` e hash de senha com
 ### Método Delete e Patch
 
 Também foi adicionado duas rotas a mais: `PATCH` e `DELETE`. Permitindo a atualização parcial e a exclusão de uma task.
+
+### Dockerfile
+
+Também foi adicionado um `Dockerfile` na raiz do projeto para conteinerizar a aplicação FastAPI com build em estágios.
