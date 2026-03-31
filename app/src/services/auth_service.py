@@ -28,6 +28,6 @@ class AuthService:
         hashed = get_password_hash(user_data.password)
         created_user = self.repository.create(db, user_data, hashed)
         return {
-            "message": "Usuário criado com sucesso",
+            "message": "User registered successfully",
             "created_at": created_user.created_at,
         }

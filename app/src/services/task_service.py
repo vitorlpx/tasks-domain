@@ -35,10 +35,10 @@ class TaskService:
 
         task = self.repository.update_task_status(db, task_id, status)
         if not task:
-            raise FailedToUpdateTaskException(task_id, "Tarefa não encontrada.")
+            raise FailedToUpdateTaskException(task_id, "Task not found.")
         return task
 
     def delete_task(self, db: Session, task_id: int) -> TaskDelete:
         if not self.repository.delete_task(db, task_id):
-            raise FailedToDeleteTaskException(task_id, "Tarefa não encontrada.")
+            raise FailedToDeleteTaskException(task_id, "Task not found.")
         return TaskDelete(message="Task deleted successfully")
