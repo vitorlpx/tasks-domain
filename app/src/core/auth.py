@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-import os
+from settings import settings
 from typing import Any, Union
 
 from fastapi import Depends
@@ -12,10 +12,6 @@ from src.core.exceptions import (
     TokenValidationException,
 )
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
-ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-
 password_hash = PasswordHash.recommended()
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -24,11 +20,10 @@ def create_access_token(subject: Union[str, Any], expires_delta: timedelta | Non
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
         to_encode = {"exp": expire, "sub": str(subject)}
-        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-        return encoded_jwt
+        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     except Exception as exc:
         raise TokenGenerationException(str(exc))
 
@@ -40,10 +35,9 @@ def get_password_hash(password: str) -> str:
 
 def decode_token(token: str):
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     except jwt.PyJWTError as exc:
         raise TokenValidationException(str(exc))
-
 
 def get_current_user_id(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),

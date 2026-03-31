@@ -8,7 +8,6 @@ from src.services.auth_service import AuthService
 
 router = APIRouter()
 
-
 def get_auth_service() -> AuthService:
     return AuthService(UserRepository())
 

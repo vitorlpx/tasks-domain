@@ -3,18 +3,18 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from src.core.config import settings
 
 engine = create_engine(
-  settings.DATABASE_URL,
-  connect_args={"check_same_thread": False}  
+    settings.DATABASE_URL,
+    connect_args={"check_same_thread": False}  
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Base(DeclarativeBase):
-  pass
+    pass
 
 def get_db():
-  db = SessionLocal()
-  try:
-    yield db
-  finally:
-    db.close()
+    db = SessionLocal()
+    try:
+      yield db
+    finally:
+      db.close()

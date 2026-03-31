@@ -1,47 +1,29 @@
 import pytest
+
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
 from src.main import app
-from src.db.database import Base, get_db
-
-# banco isolado para testes
-TEST_DATABASE_URL = "sqlite:///./test.db"
-
-engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
-@pytest.fixture(autouse=True)
-def setup_db():
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-
 # --- testes ---
 
-def test_health_check():
-    # Arrage & Act
-    response = client.get("/health")
+@pytest.fixture(autouse=True)
+def token():
+    # Cria um usuário e obtém um token de autenticação para os testes
+    user_data = {
+        "name": "Test User",
+        "email": "testuser@example.com",
+        "password": "Test!@Password#123"
+    }
     
-    # Assert
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    client.post("/auth/register", json=user_data)
+    response = client.post("/auth/login", json={"email": user_data["email"], "password": user_data["password"]})
+        
+    return response.json().get("access_token")
 
-def test_create_task():
+def test_create_task(token):
     # Arrange & Act
-    response = client.post("/tasks/", json={"title": "Test Task", "description": "Descrição"})
+    response = client.post("/tasks/", headers={"Authorization": f"Bearer {token}"}, json={"title": "Test Task", "description": "Descrição"})
     
     # Assert
     assert response.status_code == 201
@@ -49,45 +31,45 @@ def test_create_task():
     assert data["title"] == "Test Task"
     assert data["status"] == "pending"
 
-def test_get_task():
+def test_get_task(token):
     # Arrange & Act
-    created = client.post("/tasks/", json={"title": "Task Get"}).json()
-    response = client.get(f"/tasks/{created['id']}")
+    created = client.post("/tasks/", headers={"Authorization": f"Bearer {token}"}, json={"title": "Task Get"}).json()
+    response = client.get(f"/tasks/{created['id']}", headers={"Authorization": f"Bearer {token}"})
     
     # Assert
     assert response.status_code == 200
     assert response.json()["id"] == created["id"]
 
-def test_get_all_tasks():
+def test_get_all_tasks(token):
     # Arrange
-    client.post("/tasks/", json={"title": "Task 1"})
-    client.post("/tasks/", json={"title": "Task 2"})
+    client.post("/tasks/", headers={"Authorization": f"Bearer {token}"}, json={"title": "Task 1"})
+    client.post("/tasks/", headers={"Authorization": f"Bearer {token}"}, json={"title": "Task 2"})
     
     # Act
-    response = client.get("/tasks/")
+    response = client.get("/tasks/", headers={"Authorization": f"Bearer {token}"})
     
     # Assert
     assert response.status_code == 200
     assert len(response.json()) == 2
 
-def test_update_task_status():
+def test_update_task_status(token):
     # Arrange & Act
-    created = client.post("/tasks/", json={"title": "Task Update"}).json()
-    response = client.patch(f"/tasks/{created['id']}/status", json={"status": "in_progress"})
+    created = client.post("/tasks/", headers={"Authorization": f"Bearer {token}"}, json={"title": "Task Update"}).json()
+    response = client.patch(f"/tasks/{created['id']}/status", headers={"Authorization": f"Bearer {token}"}, json={"status": "in_progress"})
     
     # Assert
     assert response.status_code == 200
     assert response.json()["status"] == "in_progress"
 
-def test_get_task_not_found():
+def test_get_task_not_found(token):
     # Act
-    response = client.get("/tasks/9999")
-    
+    response = client.get("/tasks/9999", headers={"Authorization": f"Bearer {token}"})
+
     # Assert
     assert response.status_code == 404
     assert response.json() == {"detail": "Task with id 9999 not found."}
     
-def test_delete_task():
+def test_delete_task(token):
     # Arrange 
     task_data = {
         "title": "Test Task for Delete",
@@ -95,7 +77,7 @@ def test_delete_task():
     }
     
     # Act
-    create_response = client.post("/tasks/", json=task_data)
+    create_response = client.post("/tasks/", headers={"Authorization": f"Bearer {token}"}, json=task_data)
     
     # Assert
     assert create_response.status_code == 201
@@ -104,7 +86,7 @@ def test_delete_task():
     task_id = created_task["id"]
     
     #Act
-    delete_response = client.delete(f"/tasks/{task_id}")
+    delete_response = client.delete(f"/tasks/{task_id}", headers={"Authorization": f"Bearer {token}"}   )
     
     # Assert
     assert delete_response.status_code == 200
