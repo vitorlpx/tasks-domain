@@ -189,6 +189,27 @@ Documentação Swagger em `http://localhost:8000/docs`.
 pytest -q
 ```
 
+### 6. Executar com Docker (Dockerfile na raiz)
+
+Na raiz do projeto, execute:
+
+```bash
+docker build -t tasks-domain:1.0 .
+docker run --rm -d -p 8000:8000 --env-file .env --name tasks-domain-api tasks-domain:1.0
+```
+
+Validar health check:
+
+```bash
+curl http://localhost:8000/health
+```
+
+Parar o container:
+
+```bash
+docker stop tasks-domain-api
+```
+
 ---
 
 ## Infraestrutura (Terraform + LocalStack)
