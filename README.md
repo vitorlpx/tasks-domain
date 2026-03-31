@@ -22,6 +22,11 @@ API REST para gerenciamento de tasks, desenvolvida com FastAPI, SQLAlchemy e SQL
 tasks-domain/
 ├── app/
 │   ├── requirements.txt
+│   ├── settings.py
+│   ├── tests/
+│   │   ├── conftest.py
+│   │   ├── test_health.py
+│   │   └── test_task_routes.py
 │   └── src/
 │       ├── main.py
 │       ├── api/
@@ -29,7 +34,6 @@ tasks-domain/
 │       │       ├── task.py
 │       │       └── auth.py
 │       ├── core/
-│       │   ├── config.py
 │       │   ├── auth.py
 │       │   └── exceptions.py
 │       ├── db/
@@ -65,6 +69,14 @@ tasks-domain/
 ├── docker-compose.yml
 └── pytest.ini
 ```
+
+---
+
+A configuracao da aplicacao e centralizada em `app/settings.py`, responsavel por carregar variaveis via `.env` (como `DATABASE_URL`, `SECRET_KEY`, `JWT_ALGORITHM` e `ACCESS_TOKEN_EXPIRE_MINUTES`).
+
+Os testes seguem organizacao por responsabilidade na pasta `app/tests`, com `conftest.py` para setup compartilhado e arquivos separados para rotas de health check e tasks. A execucao dos testes e padronizada por `pytest.ini` com `testpaths = app/tests`.
+
+As models utilizam o padrao tipado do SQLAlchemy 2.x com `Mapped` e `mapped_column`, melhorando legibilidade e suporte de tipagem estatica.
 
 ---
 
@@ -174,7 +186,7 @@ Documentação Swagger em `http://localhost:8000/docs`.
 ### 5. Executar os testes
 
 ```bash
-pytest app/tests -q
+pytest -q
 ```
 
 ---
