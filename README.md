@@ -169,7 +169,7 @@ Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 DATABASE_URL=sqlite:///./app.db
-SECRET_KEY=sua_chave_segura
+SECRET_KEY=sua_chave_segura (mínimo de +32 bytes, ideal de 64 bytes)
 JWT_ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
