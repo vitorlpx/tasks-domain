@@ -6,7 +6,7 @@ API REST para gerenciamento de tasks, desenvolvida com FastAPI, SQLAlchemy e SQL
 
 ## Tecnologias
 
-- **Python** + **FastAPI**
+- **Python 3.13.2** + **FastAPI**
 - **SQLAlchemy** + **SQLite**
 - **Pydantic** + **pydantic-settings**
 - **PyJWT** + **pwdlib[argon2]**
